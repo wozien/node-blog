@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
+module.exports = function(app) {
+  app.get('/', (req, res) => {
+    res.redirect('/posts');
+  });
 
-router.get('/', (req, res) => {
-  res.send('hello, express');
-});
-
-module.exports = router;
+  app.use('/signup', require('./signup'));
+  app.use('/signin', require('./signin'));
+  app.use('/signout', require('./signout'));
+  app.use('/posts', require('./posts'));
+  app.use('/comments', require('./comments'));
+}

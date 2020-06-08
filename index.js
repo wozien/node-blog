@@ -16,14 +16,14 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 // session 中间件
 app.use(session({
-  name: config.session.key,
-  secret: config.session.secret,
+  name: config.session.key,         // session_id 存在在cookie的名称
+  secret: config.session.secret,    // 加密密钥
   resave: true,
-  saveUninitialized: false,
+  saveUninitialized: false,         // 未登录也创建一个session
   cookie: {
-    maxAge: config.session.maxAge
+    maxAge: config.session.maxAge    // cookie过期时间
   },
-  store: new MongoStore({
+  store: new MongoStore({            // 将session存储到mongodb
     url: config.mongodb
   })
 }))

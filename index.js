@@ -5,6 +5,7 @@ const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
 const config = require('config-lite')(__dirname)
 const router = require('./router')
+const pkg = require('./package')
 
 const app = express()
 
@@ -30,6 +31,19 @@ app.use(session({
 
 // flash 中间件
 app.use(flash())
+
+// 全局渲染变量
+app.locals.blog = {
+  title: pkg.title,
+  description: pkg.description
+}
+
+// 添加模版必须的3个变量
+app.use((req, res, next) => {
+  res.locals.user = req.session.user
+  res.locals.success = req.flash('success').toString()
+  res.locals.error = req.flash('error').toString()
+})
 
 // 路由
 router(app)

@@ -1,7 +1,7 @@
 {
-  "name": "node-blog",
+  "name": "Sblog",
   "version": "1.0.0",
-  "description": "",
+  "description": "a simple blog",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index"

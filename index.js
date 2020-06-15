@@ -1,6 +1,7 @@
 const path = require('path')
 const express = require('express')
 const session = require('express-session')
+const formidable = require('express-formidable')
 const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
 const config = require('config-lite')(__dirname)
@@ -32,9 +33,15 @@ app.use(session({
 // flash 中间件
 app.use(flash())
 
+// 处理表单以及文件上传的中间件
+app.use(formidable({
+  uploadDir: path.join(__dirname, 'public/img'),
+  keepExtensions: true
+}))
+
 // 全局渲染变量
 app.locals.blog = {
-  title: pkg.title,
+  title: pkg.name,
   description: pkg.description
 }
 
@@ -43,6 +50,7 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user
   res.locals.success = req.flash('success').toString()
   res.locals.error = req.flash('error').toString()
+  next()
 })
 
 // 路由

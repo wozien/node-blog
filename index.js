@@ -35,8 +35,8 @@ app.use(flash())
 
 // 处理表单以及文件上传的中间件
 app.use(formidable({
-  uploadDir: path.join(__dirname, 'public/img'),
-  keepExtensions: true
+  uploadDir: path.join(__dirname, 'public/img'),  // 文件上传目录
+  keepExtensions: true     // 保持上传的后缀名
 }))
 
 // 全局渲染变量

@@ -1,12 +1,15 @@
+
 const path = require('path')
 const express = require('express')
 const session = require('express-session')
 const formidable = require('express-formidable')
 const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
-const config = require('config-lite')(__dirname)
-const router = require('./router')
+const router = require('./controllers')
 const pkg = require('./package')
+require('dotenv').config()
+const db = require('./utils/db')
+db.connect()
 
 const app = express()
 
@@ -18,19 +21,21 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 // session 中间件
 app.use(session({
-  name: config.session.key,         // session_id 存在在cookie的名称
-  secret: config.session.secret,    // 加密密钥
+  name: process.env.SESSION_KEY,         // session_id 存在在cookie的名称
+  secret: process.env.SESSION_SECRET,    // 加密密钥
   resave: true,
   saveUninitialized: false,         // 未登录也创建一个session
   cookie: {
-    maxAge: config.session.maxAge    // cookie过期时间
+    maxAge: 30*24*3600*1000    // cookie过期时间
   },
   store: new MongoStore({            // 将session存储到mongodb
-    url: config.mongodb
+    url: process.env.DB_ADDR
   })
 }))
 
-// flash 中间件
+// flash 中间件 基于express-session ，必须放在后面
+// req.flash(key, value) 相当于在 req.session.flash[key] = value
+// req.flash(key) 获取  req.session.flash[key] 并且delete掉
 app.use(flash())
 
 // 处理表单以及文件上传的中间件
@@ -56,4 +61,5 @@ app.use((req, res, next) => {
 // 路由
 router(app)
 
-app.listen(config.port, () => console.log(`Web Server listening on ${config.port}`))
+const port = process.env.APP_PORT || 8080
+app.listen(port, () => console.log(`Web Server listening on ${port}`))

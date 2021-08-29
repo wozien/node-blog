@@ -3,16 +3,15 @@ const path = require('path')
 const sha1 = require('sha1')
 const express = require('express')
 const router = express.Router()
-
-const UserModel = require('../models/User')
-const checkNotLogin = require('../middlewares/check').checkNoLogin;
+const checkNotLogin = require('../middlewares/check').checkNoLogin
+const user = require('../services/user')
 
 router.get('/', checkNotLogin, (req, res) => {
   res.render('signup')
 })
 
 // post 用户注册
-router.post('/', checkNotLogin, (req, res, next) => {
+router.post('/', checkNotLogin, async (req, res, next) => {
   const name = req.fields.name
   const gender = req.fields.gender
   const bio = req.fields.bio
@@ -42,43 +41,43 @@ router.post('/', checkNotLogin, (req, res, next) => {
     }
   } catch (e) {
     // 注册失败，删除上传的头像
-    fs.unlink('req.files.avatar.path')
+    if(req.files.avatar) {
+      fs.unlink(req.files.avatar.path, () => {})
+    }
     req.flash('error', e.message)
     return res.redirect('/signup')
   }
 
-  password = sha1(password)
-
   // 写入数据库用户数据
-  let user = {
+  let userData = {
     name,
-    password,
+    password: sha1(password),
     gender,
     bio,
     avatar
   }
 
-  UserModel.create(user).then(result => {
-    // 此user是插入mongodb后的值，包含_id
-    user = result.ops[0]
-    delete user.password
-    req.session.user = user
+  try {
+    const result = await user.create(userData)
+    delete result.password
+    // 创建成功后把用户信息存在session内存中
+    // 下一次请求过来根据前端cookie能拿到对应的session
+    req.session.user = result
     req.flash('success', '注册成功')
     // 跳转到首页
     res.redirect('/posts')
-  }).catch(e => {
-    console.log(e.message)
+    
+  } catch(e) {
+    // console.log(e.message)
     // 注册失败，删除上传的头像
-    fs.unlink('req.files.avatar.path', (err) => {
-
-    })
+    fs.unlink(req.files.avatar.path, () => {})
     // 用户名被占用
     if(e.message.match('duplicate key')) {
       req.flash('error', '用户名被占用')
       return res.redirect('/signup')
     }
     next(e)
-  })
+  }
 
 })
 

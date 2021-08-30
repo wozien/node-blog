@@ -16,7 +16,7 @@ router.get('/', checkLogin, (req, res, next) => {
 })
 
 // GET /posts/create 发表文章页
-router.get('/create', checkLogin, function (req, res, next) {
+router.get('/create', checkLogin,  (req, res) => {
   res.render('create')
 })
 
@@ -73,23 +73,25 @@ router.get('/:postId', function (req, res, next) {
 })
 
 // GET /posts/:postId/edit 更新文章页
-router.get('/:postId/edit', checkLogin, function (req, res, next) {
+router.get('/:postId/edit', checkLogin, async (req, res, next) => {
   const postId = req.params.postId
   const author = req.session.user.id
 
-  postService.getPostById(postId)
-    .then(post => {
-      if(!post) {
-        throw new Error('该文章不存在')
-      }
+  try {
+    const post = await postService.getPostById(postId)
 
-      if(post.author.id !== author) {
-        throw new Error('权限不足')
-      }
+    if(!post) {
+      throw new Error('该文章不存在')
+    }
 
-      res.render('edit', { post })
-    })
-    .catch(next)
+    if(post.author.id !== author) {
+      throw new Error('权限不足')
+    }
+
+    res.render('edit', { post })
+  } catch(e) {
+    next(e)
+  }
 })
 
 // POST /posts/:postId/edit 更新一篇文章

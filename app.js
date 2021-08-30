@@ -7,7 +7,10 @@ const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
 const router = require('./controllers')
 const pkg = require('./package')
+const winston = require('winston')
+const expressWinston = require('express-winston')
 require('dotenv').config()
+// db init
 const db = require('./utils/db')
 db.connect()
 
@@ -40,7 +43,7 @@ app.use(flash())
 
 // 处理表单以及文件上传的中间件
 app.use(formidable({
-  uploadDir: path.join(__dirname, 'public/img'),  // 文件上传目录
+  uploadDir: path.join(__dirname, 'public/tmp'),  // 文件上传目录
   keepExtensions: true     // 保持上传的后缀名
 }))
 
@@ -58,8 +61,41 @@ app.use((req, res, next) => {
   next()
 })
 
+// 正常请求的日志
+// app.use(expressWinston.logger({
+//   transports: [
+//     new (winston.transports.Console)({
+//       json: true,
+//       colorize: true
+//     }),
+//     new winston.transports.File({
+//       filename: 'logs/success.log'
+//     })
+//   ]
+// }))
+
 // 路由
 router(app)
+
+// 错误请求的日志
+app.use(expressWinston.errorLogger({
+  transports: [
+    new winston.transports.Console({
+      json: true,
+      colorize: true
+    }),
+    new winston.transports.File({
+      filename: 'logs/error.log'
+    })
+  ]
+}))
+
+// 错误处理
+app.use(function (err, req, res, next) {
+  console.error(err)
+  req.flash('error', err.message)
+  res.redirect('/posts')
+})
 
 const port = process.env.APP_PORT || 8080
 app.listen(port, () => console.log(`Web Server listening on ${port}`))

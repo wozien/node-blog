@@ -1,11 +1,14 @@
-A simple blog base express + mongodb 
+:rocket: A simple blog base **express + mongodb**
 
-## 开始
+## Get Start
 
 ```bash
 yarn start
 ```
 
-## 依赖
+## Feature
 
-
+- [x] Login an register
+- [x] Write, editr and delete post
+- [x] Add and delete comment
+- [x] Add new point in future, maybe... 

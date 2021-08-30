@@ -1,4 +1,5 @@
 const Post = require('../models/Post')
+const { delCommentsByPostId } = require('../services/comment')
 
 const create = async (data) => {
   const result = await Post.create(data)
@@ -6,14 +7,14 @@ const create = async (data) => {
 }
 
 // 通过文章 id 获取一篇文章
-const getPostById = async (postId) => {
+const getPostById = (postId) => {
   return Post.findOne({ _id: postId })
     .populate({ path: 'author', model: 'User' })
     .exec()
 }
 
 // 按创建时间降序获取所有用户文章或者某个特定用户的所有文章
-const getPosts = async (author) => {
+const getPosts = (author) => {
   const query = {}
   if(author) {
     query.author = author
@@ -26,19 +27,22 @@ const getPosts = async (author) => {
 }
 
 // 通过文章 id 给 pv 加 1
-const incPv = async (postId) => {
+const incPv = (postId) => {
   return Post
     .updateOne({ _id: postId }, { $inc: { pv: 1 }})
     .exec()
 }
 
 // 通过文章 id 更新一篇文章
-const updatePostById = async (postId, data) => {
+const updatePostById = (postId, data) => {
   return Post.updateOne({ _id: postId }, { $set: data }).exec()
 }
 
-const delPostById = async (postId) => {
-  return Post.deleteOne({ _id: postId })
+// 删除文章
+const delPostById =  (postId) => {
+  return Post.deleteOne({ _id: postId }).then(() => {
+    return delCommentsByPostId(postId)
+  })
 }
 
 module.exports = {

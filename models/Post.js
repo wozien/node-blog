@@ -4,8 +4,9 @@
 
 const mongoose = require('mongoose')
 const marked = require('marked')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const modelTransformer = require('../utils/model-transformer')
+const { getCommentsCount } = require('../services/comment')
 
 const postSchema = new mongoose.Schema({
   author: {
@@ -30,16 +31,20 @@ const postSchema = new mongoose.Schema({
   timestamps: true,
 })
 
+// 这些 hook 也可以放到 service 去做
 postSchema.post(['find', 'findOne'], (docs) => {
   if(!Array.isArray(docs)) {
     docs = [docs]
   }
 
+  const proms = []
   for(let doc of docs) {
     doc.htmlContent = marked(doc.content)
     // 注意这个时候还没走schema 的 toObject, createdAt 还是 date 类型
-    doc.formatCreatedAt = moment(doc.createdAt.getTime()).format('YYYY-MM-DD HH:mm')
+    doc.formatCreatedAt = dayjs(doc.createdAt).format('YYYY-MM-DD HH:mm')
+    proms.push(getCommentsCount(doc._id).then(count => doc.commentsCount = count))
   }
+  return Promise.all(proms)
 })
 
 // 1 asc -1 dsc

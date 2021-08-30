@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const checkLogin = require('../middlewares/check').checkLogin;
+const { checkLogin } = require('../middlewares/check')
 const postService = require('../services/post')
+const { getComments } = require('../services/comment')
 
 // /posts  获取所有文章
 router.get('/', checkLogin, (req, res, next) => {
@@ -59,13 +60,15 @@ router.get('/:postId', function (req, res, next) {
   const postId = req.params.postId
 
   Promise.all([
-    postService.getPostById(postId), postService.incPv(postId)
-  ]).then(([post]) => {
+    postService.getPostById(postId), 
+    getComments(postId),
+    postService.incPv(postId)
+  ]).then(([post, comments]) => {
     if(!post) {
       throw new Error('该文章不存在')
     }
 
-    res.render('post', { post })
+    res.render('post', { post, comments })
   }).catch(next)
 })
 

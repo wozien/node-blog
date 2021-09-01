@@ -97,5 +97,5 @@ app.use(function (err, req, res, next) {
   res.redirect('/posts')
 })
 
-const port = process.env.APP_PORT || 8080
+const port = process.env.APP_PORT || 8001
 app.listen(port, () => console.log(`Web Server listening on ${port}`))

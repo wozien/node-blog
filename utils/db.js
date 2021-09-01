@@ -6,7 +6,7 @@
 
  mongoose.Promise = Promise
  
- let addr = process.env.DB_ADDR
+ let addr = process.env.MONGO_URL
  const extraParams = process.env.DB_ADDR_EXTRA_PARAMS
  if (extraParams) {
    addr += extraParams

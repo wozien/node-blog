@@ -5,7 +5,7 @@ RUN yarn config set registry https://registry.npm.taobao.org/
 RUN mkdir /app
 COPY . /app 
 WORKDIR /app
-RUN rm -rf node_modules && rm .env && yarn
+RUN rm -rf node_modules && rm -f .env && yarn
 
 EXPOSE 8001
 

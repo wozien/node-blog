@@ -32,7 +32,7 @@ app.use(session({
     maxAge: 30*24*3600*1000    // cookie过期时间
   },
   store: new MongoStore({            // 将session存储到mongodb
-    url: process.env.DB_ADDR
+    url: process.env.MONGO_URL
   })
 }))
 

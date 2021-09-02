@@ -24,8 +24,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 // session 中间件
 app.use(session({
-  name: process.env.SESSION_KEY,         // session_id 存在在cookie的名称
-  secret: process.env.SESSION_SECRET,    // 加密密钥
+  name: 'nblog',         // session_id 存在在cookie的名称
+  secret: 'nlog',    // 加密密钥
   resave: true,
   saveUninitialized: false,         // 未登录也创建一个session
   cookie: {

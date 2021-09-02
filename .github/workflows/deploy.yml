@@ -35,3 +35,15 @@ jobs:
         file: docker/Dockerfile
         tags: wozien/nblog:latest
         push: true
+
+  ssh-remote-command:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USERNAME }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          script: sh /opt/nblog/upgrade.sh

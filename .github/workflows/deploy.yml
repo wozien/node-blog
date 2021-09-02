@@ -46,4 +46,4 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USERNAME }}
           password: ${{ secrets.REMOTE_PASSWORD }}
-          script: sh /opt/nblog/upgrade.sh
+          script: cd /opt/nblog && sh ./upgrade.sh

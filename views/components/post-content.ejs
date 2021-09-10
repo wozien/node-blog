@@ -5,7 +5,7 @@
          href="/posts?author=<%= post.author.id %>"
          data-title="<%= post.author.name %> | <%= ({m: '男', f: '女', x: '保密'})[post.author.gender] %>"
          data-content="<%= post.author.bio %>">
-        <img class="avatar" src="/tmp/<%= post.author.avatar %>">
+        <img class="avatar" src="/attachment/<%= post.author.avatar %>">
       </a>
     </div>
 

@@ -1,10 +1,11 @@
-const fs = require('fs')
+const fs = require('fs/promises')
 const path = require('path')
 const sha1 = require('sha1')
 const express = require('express')
 const router = express.Router()
 const checkNotLogin = require('../middlewares/check').checkNoLogin
 const user = require('../services/user')
+const { storeFile } = require('../services/attachment')
 
 router.get('/', checkNotLogin, (req, res) => {
   res.render('signup')
@@ -15,7 +16,7 @@ router.post('/', checkNotLogin, async (req, res, next) => {
   const name = req.fields.name
   const gender = req.fields.gender
   const bio = req.fields.bio
-  const avatar = req.files.avatar.path.split(path.sep).pop()
+  const avatar = req.files.avatar.path
   let password = req.fields.password
   const repassword = req.fields.repassword
 
@@ -41,8 +42,8 @@ router.post('/', checkNotLogin, async (req, res, next) => {
     }
   } catch (e) {
     // 注册失败，删除上传的头像
-    if(req.files.avatar) {
-      fs.unlink(req.files.avatar.path, () => {})
+    if(avatar) {
+      fs.unlink(avatar)
     }
     req.flash('error', e.message)
     return res.redirect('/signup')
@@ -53,11 +54,14 @@ router.post('/', checkNotLogin, async (req, res, next) => {
     name,
     password: sha1(password),
     gender,
-    bio,
-    avatar
+    bio
   }
 
   try {
+    const avatarId = await storeFile(avatar)
+    userData.avatar = avatarId 
+    fs.unlink(avatar)
+
     const result = await user.create(userData)
     delete result.password
     // 创建成功后把用户信息存在session内存中
@@ -70,7 +74,7 @@ router.post('/', checkNotLogin, async (req, res, next) => {
   } catch(e) {
     // console.log(e.message)
     // 注册失败，删除上传的头像
-    fs.unlink(req.files.avatar.path, () => {})
+    fs.unlink(req.files.avatar.path)
     // 用户名被占用
     if(e.message.match('duplicate key')) {
       req.flash('error', '用户名被占用')

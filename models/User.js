@@ -15,7 +15,7 @@ const schema = new mongoose.Schema({
     require: true 
   },
   avatar: { 
-    type: 'string', 
+    type: mongoose.Types.ObjectId,
     require: true 
   },
   gender: { 
